@@ -61,7 +61,6 @@ export default function Checkout({ auth }) {
             product_name: item.product.product_name,
             category: item.product.category,
         })),
-
     });
 
     // const [processing, setProcessing] = useState(false);

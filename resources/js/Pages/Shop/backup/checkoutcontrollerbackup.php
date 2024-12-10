@@ -33,44 +33,23 @@ class CheckoutController extends Controller
         $current_address = Address::where('user_id', Auth::id())
             ->where('active', 1)
             ->first();
-        $full_address = $current_address->full_address;
+
         $regions = [
-            "NCR" => ["National Capital Region (NCR)"],
-            "Luzon" => [
-                "Region I (Ilocos Region)",
-                "Region II (Cagayan Valley)",
-                "Region III (Central Luzon)",
-                "Region IV-A (CALABARZON)",
-                "MIMAROPA Region",
-                "Region V (Bicol Region)"
-            ],
-            "Visayas" => [
-                "Region VI (Western Visayas)",
-                "Region VII (Central Visayas)",
-                "Region VIII (Eastern Visayas)"
-            ],
-            "Mindanao" => [
-                "Region IX (Zamboanga Peninsula)",
-                "Region X (Northern Mindanao)",
-                "Region XI (Davao Region)",
-                "Region XII (SOCCSKSARGEN)",
-                "Region XIII (Caraga)",
-                "Bangsamoro Autonomous Region In Muslim Mindanao (BARMM)"
-            ],
-            "Island" => [
-                "Cordillera Administrative Region (CAR)"
-            ]
+            "NCR" => ["National Capital Region"],
+            "Luzon" => ["Ilocos Region", "Cagayan Valley", "Central Luzon", "CALABARZON", "MIMAROPA", "Bicol Region"],
+            "Visayas" => ["Western Visayas", "Central Visayas", "Eastern Visayas"],
+            "Mindanao" => ["Zamboanga Peninsula", "Northern Mindanao", "Davao Region", "SOCCSKSARGEN", "CARAGA", "Bangsamoro Autonomous Region in Muslim Mindanao"]
         ];
 
-
         $full_address = $current_address->full_address;
-        preg_match('/[^,]+$/', $full_address, $matches);
-        $region_name = $matches[0] ?? null;
-        // echo $region_name;
+        preg_match('/\((.*?)\)/', $full_address, $matches);
+        $region_name = $matches[1] ?? null;
         $classification = null;
         if ($region_name) {
+            $classification = null;
+
             foreach ($regions as $group => $region_list) {
-                if (in_array(trim($region_name), $region_list)) {
+                if (in_array($region_name, $region_list)) {
                     $classification = $group;
                     break;
                 }
@@ -84,11 +63,14 @@ class CheckoutController extends Controller
             echo "Region not found in the full address.";
         }
 
+
+        // print_r(json_encode($classification));
         foreach ($request->items as $item) {
             $product = Products::with('seller')
                 ->with('images')
                 ->where('id', $item['product_id'])
                 ->first();
+
 
             if ($product) {
                 $itemWeight = $product->weight * $item['item_quantity'];
@@ -97,28 +79,17 @@ class CheckoutController extends Controller
                 $shippingRate = $shipping_rates->firstWhere(function ($rate) use ($itemWeight) {
                     return $itemWeight >= $rate->weight_min && $itemWeight <= $rate->weight_max;
                 });
-
                 if ($shippingRate) {
                     $shippingFee = $shippingRate->$classification;
-                    // echo "The shipping fee for $classification with weight $itemWeight is $shippingFee.";
+                    echo "The shipping fee for $classification with weight $itemWeight is $shippingFee.";
                 } else {
-                    if ($itemWeight > $shipping_rates->max('weight_max')) {
-                        $maxRate = $shipping_rates->where('weight_max', $shipping_rates->max('weight_max'))->first();
-                        $ratePerKg = $maxRate->$classification / $maxRate->weight_max;
-                        $excessWeight = $itemWeight - $maxRate->weight_max;
-
-                        $adjustedShippingFee = $maxRate->$classification + ($ratePerKg * $excessWeight);
-                        $shippingFee = $adjustedShippingFee;
-
-                    } else {
-                        echo "No shipping rate found for the given weight.";
-                    }
+                    echo "No shipping rate found for the given weight.";
                 }
 
 
                 $productsData = [
                     'product' => new ShopProductResource($product),
-                    'total_weight' => number_format($itemWeight, 2),
+                    'total_weight' => $itemWeight,
                     'product_sf' => $shippingFee,
                     'seller' => $product->seller,
                     'images' => SellerProductImageResource::collection($product->images),
