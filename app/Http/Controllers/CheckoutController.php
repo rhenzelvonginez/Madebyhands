@@ -34,6 +34,7 @@ class CheckoutController extends Controller
             ->where('active', 1)
             ->first();
         $full_address = $current_address->full_address;
+        $region = $current_address->region;
         $regions = [
             "NCR" => ["National Capital Region (NCR)"],
             "Luzon" => [
@@ -62,15 +63,14 @@ class CheckoutController extends Controller
             ]
         ];
 
-
-        $full_address = $current_address->full_address;
-        preg_match('/[^,]+$/', $full_address, $matches);
-        $region_name = $matches[0] ?? null;
-        // echo $region_name;
+        // $full_address = $current_address->full_address;
+        // preg_match('/[^,]+$/', $full_address, $matches);
+        // $region_name = $matches[0] ?? null;
+        // // echo $region_name;
         $classification = null;
-        if ($region_name) {
+        if ($region) {
             foreach ($regions as $group => $region_list) {
-                if (in_array(trim($region_name), $region_list)) {
+                if (in_array(trim($region), $region_list)) {
                     $classification = $group;
                     break;
                 }
@@ -81,7 +81,7 @@ class CheckoutController extends Controller
             //     echo "Region not found in classification.";
             // }
         } else {
-            echo "Region not found in the full address.";
+            echo "Region not found .";
         }
 
         foreach ($request->items as $item) {
