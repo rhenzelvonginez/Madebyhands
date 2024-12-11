@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AddressController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ShippingRateController;
 use Inertia\Inertia;
@@ -52,6 +53,7 @@ Route::middleware('auth', 'customer')->group(function () {
     Route::get('/my-purchases/rate-order/{orderId}', [ReviewController::class, 'getRatePage'])->name('rate.show');
     Route::post('/my-purchases/create-rate-order/{orderId}', [ReviewController::class, 'creatReview'])->name('rate.create');
     Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout.show');
+    Route::get('/checkout/change-address', [AddressController::class, 'checkoutChangeAddress'])->name('checkout.change-address');
     Route::post('/checkout/create', [CheckoutController::class, 'store'])->name('checkout.store');
     Route::get('pay', [PaymentController::class, 'pay'])->name('pay.show');
     Route::get('checkout/success/{orderID}', [CheckoutController::class, 'successPage'])->name('checkout.success');

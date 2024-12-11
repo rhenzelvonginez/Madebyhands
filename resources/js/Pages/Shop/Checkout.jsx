@@ -92,6 +92,9 @@ export default function Checkout({ auth }) {
         }
     }, [flash]);
     console.log(products)
+    const changeAddressHandler = () => {
+        router.get(route('checkout.change-address'), { currentUrl: window.location.href })
+    }
     return (
         <UserAuthenticatedLayout user={auth.user}>
             <Head title="Checkout" />
@@ -116,7 +119,7 @@ export default function Checkout({ auth }) {
                                     <FaLocationDot className="text-gray-600" /> Delivery
                                     Address
                                 </h2>
-                                <button disabled className="duration-300 ease-in-out hover:text-themeColor">Change Address</button>
+                                <button type="button" onClick={() => router.get(route('checkout.change-address'), { currentUrl: window.location.href })} className="duration-300 ease-in-out hover:text-themeColor">Change Address</button>
                             </div>
                             <div className="text-gray-600">
                                 {name} | {phone_no}
