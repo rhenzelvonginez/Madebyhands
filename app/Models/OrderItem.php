@@ -46,6 +46,7 @@ class OrderItem extends Model
     'is_rated',
     'payment_status',
     'cs_id',
+    'shipping_fee',
   ];
 
   public function order()

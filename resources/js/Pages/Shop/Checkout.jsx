@@ -28,10 +28,12 @@ export default function Checkout({ auth }) {
         0
     );
 
-    const totalPrice = products?.reduce(
-        (acc, item) => acc + item.product.price * item.buying_quantity + item.product_sf,
+    const totalPrice = products.reduce(
+        (acc, item) => acc + (item.product.price * item.buying_quantity), // Only multiply price by quantity
         0
     );
+    const totalAmount = 0;
+
 
     const { data, setData, errors, processing, post } = useForm({
         name: name,
@@ -108,9 +110,9 @@ export default function Checkout({ auth }) {
                         >
                             <IoChevronBackCircleSharp /> back
                         </button>
-                        <h1 className="text-xl font-bold text-center text-gray-800">
+                        <button type="button " onClick={() => changeAddressHandler} className="text-xl font-bold text-center text-gray-800">
                             Checkout
-                        </h1>
+                        </button>
                     </div>
                     <form onSubmit={handleSubmit} className="mt-6" method="POST">
                         <div className="p-4 bg-gray-100 rounded-lg">
@@ -178,29 +180,28 @@ export default function Checkout({ auth }) {
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="flex flex-col items-end gap-3">
-                                        <div className="flex flex-col items-end font-bold text-gray-800">
-                                            <small> {"(Total weight = shipping fee) "}</small>
-                                            <p className="text-xl">{
-                                                `${item.total_weight} = ${new Intl.NumberFormat().format(
-                                                    item.product_sf
-                                                )}`
-                                            }
-                                            </p>
-                                        </div>
-                                        <div className="flex flex-col items-end font-bold text-gray-800">
-                                            <small> {"(Shipping Fee + Price * Qty = Total) "}</small>
-                                            <p className="text-xl">{
-                                                `   Php
+                                    <div className="flex flex-col items-end h-full justify-end  font-bold text-gray-600">
+                                        <p className="text-xl">{
+                                            `   
                                                ${new Intl.NumberFormat().format(
-                                                    item.product.price *
-                                                    item.buying_quantity + item.product_sf
-                                                )} `
-                                            }
-                                            </p>
-                                        </div>
-                                        <p className="text-xl font-bold text-gray-800">
-
+                                                item.product.price *
+                                                item.buying_quantity
+                                            )} `
+                                        }</p>
+                                        <p className="text-xl">{
+                                            ` 
+                                               ${new Intl.NumberFormat().format(
+                                                item.product_sf
+                                            )} `
+                                        }
+                                        </p>
+                                        <p className="text-xl border-t-2 border-gray-800 my-1 pt-1 text-gray-800">{
+                                            ` Total  Php
+                                               ${new Intl.NumberFormat().format(
+                                                item.product.price *
+                                                item.buying_quantity + item.product_sf
+                                            )} `
+                                        }
                                         </p>
                                     </div>
                                 </div>
@@ -223,10 +224,17 @@ export default function Checkout({ auth }) {
                             </span>
                         </div>
                         <div className="flex justify-between mt-2 font-semibold text-gray-700">
-                            <span>Total Price:</span>
+                            <span>Total Price: </span>
                             <span>
                                 Php
                                 {" " + new Intl.NumberFormat().format(totalPrice)}
+                            </span>
+                        </div>
+                        <div className="flex justify-between mt-2 font-semibold text-gray-700">
+                            <span>Total Amount:</span>
+                            <span>
+                                Php
+                                {" " + new Intl.NumberFormat().format(totalSf + totalPrice)}
                             </span>
                         </div>
 

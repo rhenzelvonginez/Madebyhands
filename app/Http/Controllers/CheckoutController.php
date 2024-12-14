@@ -182,6 +182,19 @@ class CheckoutController extends Controller
 
             $line_items = [];
             $orderItemsList = [];
+            $orderShippingFee = 0;
+
+            foreach ($request->items as $index => $item) {
+                $orderShippingFee += $item['shipping_fee'];
+            }
+
+            $line_items[] = [
+                'name' => 'Shipping Fee',
+                'quantity' => 1,
+                'amount' => (int) ($orderShippingFee * 100),
+                'currency' => 'PHP',
+                'description' => 'Shipping fee for the order',
+            ];
 
             foreach ($request->items as $item) {
 
@@ -202,14 +215,17 @@ class CheckoutController extends Controller
                     'status' => 'order placed',
                     'product_name' => $item['product_name'],
                     'category' => $item['category'],
-                    'amount' => $item['quantity'] * $item['price'],
+                    'amount' => $item['quantity'] * $item['price'] + $item['shipping_fee'],
                     'delivery_address' => $request->address,
+                    'shipping_fee' => $item['shipping_fee']
                 ]);
+
+                $orderShippingFee += $item['shipping_fee'];
 
                 $line_items[] = [
                     'name' => $processedOrderItem->product_name,
                     'quantity' => (int) $processedOrderItem->quantity,
-                    'amount' => (int) ($processedOrderItem->amount / $processedOrderItem->quantity . '00'),
+                    'amount' => (int) ($item['quantity'] * $item['price'] / $processedOrderItem->quantity * 100),
                     'currency' => 'PHP',
                     'description' => 'Description for ' . $processedOrderItem->product_name,
                 ];
@@ -218,6 +234,8 @@ class CheckoutController extends Controller
                     'order_item_id' => $processedOrderItem->id,
                 ];
             }
+
+
 
             //remove the order from cart if its from cart
             if (isset($request->cart_items)) {
